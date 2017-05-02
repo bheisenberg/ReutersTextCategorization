@@ -36,7 +36,6 @@ namespace NeuralTextCategorization
             List<Article> articles = new List<Article>();
             foreach (RawArticle article in rawArticles)
             {
-                //Debug.WriteLine(article.topics.Count);
                 List<int> wordVector = CreateVector(topWords, article.words);
                 List<int> topicVector = CreateVector(uniqueTopics, article.topics);
                 Article newArticle = new Article(wordVector, topicVector);
@@ -128,22 +127,6 @@ namespace NeuralTextCategorization
             return xdoc;
         }
 
-        /*private List<XElement> GetArticleElements(string[] inputFiles)
-        {
-            Debug.WriteLine("Finding articles...");
-            List<XElement> articleElements = new List<XElement>();
-            foreach (string input in inputFiles)
-            {
-                Debug.WriteLine(input);
-                XDocument xdoc = CreateXDoc(input);
-                foreach (var parent in xdoc.Elements())
-                {
-                    articleElements.Add(parent);
-                }
-            }
-            return articleElements;
-        }*/
-
         private List<RawArticle> GetArticles(string[] inputFiles)
         {
             Debug.WriteLine("Finding articles...");
@@ -180,7 +163,6 @@ namespace NeuralTextCategorization
                         string newWord = word.Replace("+", "").Replace(".", "").Replace(",", "");
                         words.Add(newWord);
                         totalWords.Add(newWord);
-                        //Debug.WriteLine(newWord);
                     }
                 }
             }
