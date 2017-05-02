@@ -8,18 +8,82 @@ using System.Diagnostics;
 using System.Xml.Linq;
 using System.Xml;
 
+namespace NeuralTextCategorization
+{
     public class XmlParser
     {
-        string inputFile = "Resources/reut2-000.sgm";
-
+        string[] files = Directory.GetFiles("Resources", "*.sgm");
+        Dictionary<string, int> words;
         public XmlParser()
         {
-            Parse(inputFile);
+            //Parse(inputFile);
+            foreach (string file in files)
+            {
+                Debug.WriteLine(file);
+
+            }
+            Parse(files);
         }
 
-        private void Parse(string input)
+        private void Parse(string[] inputFiles)
         {
-            var text = File.ReadAllText(input);
+            words = new Dictionary<string, int>();
+            ArticleData articleData = GetArticleData(inputFiles);
+            foreach (string word in articleData.words)
+            {
+                Debug.WriteLine(word);
+            }
+        }
+
+        private ArticleData GetArticleData(string[] inputFiles)
+        {
+            Dictionary<string, int> wordDict = new Dictionary<string, int>();
+            List<string> topics = new List<string>();
+            foreach (string input in inputFiles)
+            {
+                XDocument xdoc = CreateXDoc(input);
+                topics.AddRange(GetTopic(xdoc));
+                GetWords(xdoc, wordDict);
+            }
+            List<string> words = GetTopWords(wordDict);
+            return new ArticleData(words, topics);
+        }
+
+        private List<string> GetTopWords(Dictionary<string, int> wordDict)
+        {
+            var wordsOrdered = (from entry in wordDict orderby entry.Value descending select entry).ToList();
+            for (int i = 0; i < 1000; i++)
+            {
+                Debug.WriteLine(string.Format("{0}: {1}: {2}", i, wordsOrdered[i].Key, wordsOrdered[i].Value));
+                words.Add(wordsOrdered[i].Key);
+            }
+        }
+
+        private List<string> GetTopics(XDocument xdoc)
+        {
+            List<string> topics = new List<string>();
+            foreach (var parent in xdoc.Elements())
+            {
+                var topicData = from element in xdoc.Elements().Elements()
+                                where element.Name == "TOPICS"
+                                select element;
+                if (topicData.Count() > 0)
+                {
+                    foreach (string topic in topicData)
+                    {
+                        if (topic != "" && !topics.Contains(topic))
+                        {
+                            topics.Add(topic);
+                        }
+                    }
+                }
+            }
+            return topics;
+        }
+
+        private XDocument CreateXDoc(string input)
+        {
+            var text = String.Join("\n", File.ReadAllLines(input).Skip(1));
             var rootedXML = "<root>" + text + "</root>";
             XDocument xdoc = null;
             XmlReaderSettings settings = new XmlReaderSettings
@@ -31,52 +95,40 @@ using System.Xml;
             {
                 xdoc = XDocument.Load(xmlReader);
             }
+            return xdoc;
+        }
 
+        private Dictionary<string, int> GetWords(XDocument xdoc, Dictionary<string, int> wordDict)
+        {
+            List<string> words = new List<string>();
             foreach (var parent in xdoc.Elements())
             {
                 foreach (var childElement in parent.Elements())
                 {
-                    Debug.WriteLine("ELEMENT: " + childElement.Name);
-                    var data = from element in childElement.Elements()
-                               where element.Name == "TEXT"
+                    List<string> filteredWords = new List<string> { "the", "and", "if", "then", "a", "be", "to", "of", "in", "that", "have", "i", "it", "for", "not", "on", "with", "he", "as", "you", "do", "at", "this", "but", "by", "is", "from", "reuter", "reuters", "", "-" };
+                    var data = from element in childElement.Elements().Elements()
+                               where element.Name == "BODY"
                                select element;
-                    Debug.WriteLine(data.First().Value);
+                    if (data.Count() > 0)
+                    {
+                        string body = data.First().Value.ToLower();
+                        var bodySplit = body.Split();
+                        foreach (string word in bodySplit)
+                        {
+                            word.Replace("+", "".Replace(".", "").Replace(",", ""));
+                            if (!filteredWords.Contains(word))
+                            {
+                                if (!wordDict.Keys.Contains(word))
+                                {
+                                    wordDict.Add(word, 0);
+                                }
+                                wordDict[word] += 1;
+                            }
+                        }
+                    }
                 }
             }
-
-
-
-            /*var data = from element in xdoc.Elements()
-                       select element;
-
-            foreach (var item in data)
-            {
-                Debug.WriteLine("ITEM: "+item.Value);
-            }*/
-            /*XmlReader xmlReader = XmlTextReader.Create(inputFile);
-
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.CheckCharacters = false;
-            
-            settings.XmlResolver = null;
-
-            XmlReader reader = XmlReader.Create(inputFile, settings);
-
-            //reader.MoveToContent();
-            int count = 100;
-            while (reader.Read() && --count > 0)
-            {
-                if(reader.NodeType == XmlNodeType.Element)
-                {
-
-                }
-                //if (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.)
-                //{
-                Debug.WriteLine(reader.NodeType);
-                //}
-            }*/
-
-
+            return wordDict;
         }
     }
 }
