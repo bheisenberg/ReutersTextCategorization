@@ -11,6 +11,7 @@ namespace NeuralTextCategorization
         static void Main(string[] args)
         {
             XmlParser xmlParser = new XmlParser();
+            NeuralCategorization neuralCategorization = new NeuralCategorization(xmlParser.GetNeuralData());
         }
     }
 }

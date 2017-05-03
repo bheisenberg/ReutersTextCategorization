@@ -18,45 +18,48 @@ namespace NeuralTextCategorization
         string[] files = Directory.GetFiles("Resources", "*.sgm");
         public XmlParser()
         {
-            Parse(files);
         }
 
-        private void Parse(string[] inputFiles)
+        public NeuralData GetNeuralData()
         {
             this.totalWords = new List<string>();
             this.uniqueTopics = new List<string>();
             Debug.WriteLine("PARSING");
-            List<RawArticle> articles = GetArticles(inputFiles);
+            List<RawArticle> articles = GetArticles(files);
             topWords = GetTopWords(totalWords);
-            List<Article> articleVectors = GetArticleVectors(articles);
+            return GetArticleVectors(articles);
         }
 
-        private List<Article> GetArticleVectors(List<RawArticle> rawArticles)
+        private NeuralData GetArticleVectors(List<RawArticle> rawArticles)
         {
-            List<Article> articles = new List<Article>();
-            foreach (RawArticle article in rawArticles)
+            int[][] input = new int[rawArticles.Count][];
+            int[][] output = new int[rawArticles.Count][];
+            for (int i=0; i < rawArticles.Count; i++)
             {
-                List<int> wordVector = CreateVector(topWords, article.words);
-                List<int> topicVector = CreateVector(uniqueTopics, article.topics);
-                Article newArticle = new Article(wordVector, topicVector);
-                Debug.WriteLine(newArticle.ToString());
-                articles.Add(newArticle);
+                int[] wordVector = CreateVector(topWords, rawArticles[i].words);
+                int[] topicVector = CreateVector(uniqueTopics, rawArticles[i].topics);
+                input[i] = wordVector;
+                output[i] = topicVector;
+                PrintVectors(wordVector, topicVector);
+
             }
-            return articles;
+            NeuralData neuralData = new NeuralData(input, output);
+            Debug.WriteLine(neuralData.ToString());
+            return neuralData;
         }
 
-        private List<int> CreateVector(List<string> classifier, List<string> data)
+        private int[] CreateVector(List<string> classifier, List<string> data)
         {
-            List<int> vector = new List<int>(classifier.Count);
+            int[] vector = new int[classifier.Count];
             for (int i = 0; i < classifier.Count; i++)
             {
                 if (data.Contains(classifier[i]))
                 {
-                    vector.Add(1);
+                    vector[i] = 1;
                 }
                 else
                 {
-                    vector.Add(0);
+                    vector[i] = 0;
                 }
             }
             return vector;
@@ -167,6 +170,24 @@ namespace NeuralTextCategorization
                 }
             }
             return words;
+        }
+
+        private void PrintVectors(int[] input, int[] output)
+        {
+            string inputPrint = "input: < ";
+            for (int j = 0; j < input.Length; j++)
+            {
+                inputPrint += input[j] + ", ";
+            }
+            inputPrint += ">";
+            Debug.WriteLine(inputPrint);
+            string outputPrint = "output: < ";
+            for (int k = 0; k < output.Length; k++)
+            {
+                outputPrint += output[k] + ", ";
+            }
+            outputPrint += ">";
+            Debug.WriteLine(outputPrint);
         }
 
     }
