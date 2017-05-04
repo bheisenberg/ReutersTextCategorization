@@ -18,6 +18,7 @@ namespace NeuralTextCategorization
         string[] files = Directory.GetFiles("Resources", "*.sgm");
         public XmlParser()
         {
+
         }
 
         public NeuralData GetNeuralData()
@@ -32,25 +33,24 @@ namespace NeuralTextCategorization
 
         private NeuralData GetArticleVectors(List<RawArticle> rawArticles)
         {
-            int[][] input = new int[rawArticles.Count][];
-            int[][] output = new int[rawArticles.Count][];
+            double[][] input = new double[rawArticles.Count][];
+            double[][] output = new double[rawArticles.Count][];
             for (int i=0; i < rawArticles.Count; i++)
             {
-                int[] wordVector = CreateVector(topWords, rawArticles[i].words);
-                int[] topicVector = CreateVector(uniqueTopics, rawArticles[i].topics);
+                double[] wordVector = CreateVector(topWords, rawArticles[i].words);
+                double[] topicVector = CreateVector(uniqueTopics, rawArticles[i].topics);
                 input[i] = wordVector;
                 output[i] = topicVector;
                 PrintVectors(wordVector, topicVector);
 
             }
             NeuralData neuralData = new NeuralData(input, output);
-            Debug.WriteLine(neuralData.ToString());
             return neuralData;
         }
 
-        private int[] CreateVector(List<string> classifier, List<string> data)
+        private double[] CreateVector(List<string> classifier, List<string> data)
         {
-            int[] vector = new int[classifier.Count];
+            double[] vector = new double[classifier.Count];
             for (int i = 0; i < classifier.Count; i++)
             {
                 if (data.Contains(classifier[i]))
@@ -172,7 +172,7 @@ namespace NeuralTextCategorization
             return words;
         }
 
-        private void PrintVectors(int[] input, int[] output)
+        private void PrintVectors(double[] input, double[] output)
         {
             string inputPrint = "input: < ";
             for (int j = 0; j < input.Length; j++)

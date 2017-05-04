@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 public class NeuralData
 {
-    public int[][] input { get; set; }
-    public int[][] output { get; set; }
+    public double[][] input { get; set; }
+    public double[][] output { get; set; }
 
-    public NeuralData(int[][] input, int[][] output)
+    public NeuralData(double[][] input, double[][] output)
     {
         this.input = input;
         this.output = output;
