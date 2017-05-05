@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Accord;
 using Accord.MachineLearning;
 using Accord.Neuro;
-using Accord.Math;
 using Accord.Neuro.Learning;
 using System.Diagnostics;
 using Accord.IO;
@@ -14,44 +13,68 @@ using Accord.Statistics.Distributions.Univariate;
 
 public class NeuralCategorization
 {
-    public double[][] input { get; set; }
-    public double[][] output { get; set; }
-    public float learningRate = 0.3f;
-    public float momentum = 0.9f;
-    public float targetError = 0.0004f;
+    public int folds = 10;
+    private float targetError = 0.005f;
+    public NeuralData neuralData;
     public NeuralCategorization(NeuralData neuralData)
     {
-        this.input = neuralData.input;
-        this.output = neuralData.output;
-        InitializeNetwork();
+        this.neuralData = ShuffledData(neuralData);
+        StartCrossValidation();
     }
 
-    /*CrossValidation crossValidation = new CrossValidation(size: input.Length, folds: 10);
-crossValidation.Fitting = delegate (int k, int[] indicesTrain, int[] indicesValidation)
-{
-    return new CrossValidationValues<object>();
-};*/
-
-    public void InitializeNetwork ()
+    public int[] RandomIndices (double[][] inputArray)
     {
-        Debug.WriteLine("INITIALIZING NETWORK");
-        IActivationFunction function = new SigmoidFunction();
-        var network = new ActivationNetwork(function, input[0].Length, neuronsCount: new[] { input[0].Length/2, output[0].Length });
-        Debug.WriteLine("INITIALIZED");
-        var teacher = new BackPropagationLearning(network);
-        teacher.LearningRate = learningRate;
-        teacher.Momentum = momentum;
-        var y = output;
-
-        // Iterate until stop criteria is met
-        double error = teacher.RunEpoch(input, output);
-        while (error > targetError)
+        int height = inputArray.GetLength(0);
+        int[] indicies = new int[height];
+        Debug.WriteLine("Height: " + height);
+        for(int i=0; i < height; i++)
         {
-            error = teacher.RunEpoch(input, output);
-            Debug.WriteLine("ERROR: "+error);
+            indicies[i] = i;
+        }
+        Random random = new Random();
+        return indicies.OrderBy(x => random.Next()).ToArray();
+    }
+
+    public NeuralData ShuffledData (NeuralData neuralData)
+    {
+        Debug.WriteLine("SHUFFLING DATA");
+        int[] indices = RandomIndices(neuralData.input);
+        double[][] tempInput = new double[indices.Length][];
+        double[][] tempOutput = new double[indices.Length][];
+        for (int i=0; i < neuralData.input.Length; i++)
+        {
+            tempInput[i] = neuralData.input[indices[i]];
+            tempOutput[i] = neuralData.output[indices[i]];
+        }
+        return new NeuralData(tempInput, tempOutput);
+    }
+
+    public void StartCrossValidation()
+    {
+        int size = neuralData.input.GetLength(0);
+        int n = size / folds;
+        for (int i=0; i < folds; i++)
+        {
+            Debug.WriteLine("CURRENT FOLD: " + i);
+            int start = i * size;
+            int end = (i + 1) * size - 1;
+            FoldData currentFold = new FoldData(neuralData, start, end);
+            int hiddenLayers = (currentFold.trainX.Length / currentFold.trainY.Length) / 2;
+            IActivationFunction function = new BipolarSigmoidFunction();
+            var network = new ActivationNetwork(function, currentFold.trainX.Count(), hiddenLayers, currentFold.trainY.Count());
+            var teacher = new ParallelResilientBackpropagationLearning(network);
+            new NguyenWidrow(network).Randomize();
+            double error = int.MaxValue;
+            double previousError = error;
+            Debug.WriteLine("INITIAL ERROR: " + error);
+            do
+            {
+                previousError = error;
+                error = teacher.RunEpoch(currentFold.trainX, currentFold.trainY);
+                Debug.WriteLine("ERROR: " + error + " CHANGE: " + (Math.Abs(previousError - error) / previousError));
+            }
+            while (error > 0 && (Math.Abs(previousError - error)) / previousError > targetError);
         }
     }
-
-
 }
 

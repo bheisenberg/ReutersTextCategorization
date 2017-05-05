@@ -15,6 +15,7 @@ namespace NeuralTextCategorization
         private List<string> totalWords;
         private List<string> uniqueTopics;
         private List<string> topWords;
+        private int wordCount = 250;
         private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TextCategorization");
         private string input = "input.txt";
         private string output = "output.txt";
@@ -121,7 +122,7 @@ namespace NeuralTextCategorization
                 }
             }
             var wordsOrdered = (from entry in wordDict orderby entry.Value descending select entry).ToList();
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < wordCount; i++)
             {
                 Debug.WriteLine(string.Format("{0}: {1}: {2}", i, wordsOrdered[i].Key, wordsOrdered[i].Value));
                 topWords.Add(wordsOrdered[i].Key);

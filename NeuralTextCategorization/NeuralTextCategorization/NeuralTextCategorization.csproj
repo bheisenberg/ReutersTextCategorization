@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Article.cs" />
     <Compile Include="ArticleData.cs" />
+    <Compile Include="FoldData.cs" />
     <Compile Include="NeuralCategorization.cs" />
     <Compile Include="NeuralData.cs" />
     <Compile Include="RawArticle.cs" />
