@@ -16,6 +16,9 @@ public class NeuralCategorization
 {
     public double[][] input { get; set; }
     public double[][] output { get; set; }
+    public float learningRate = 0.3f;
+    public float momentum = 0.9f;
+    public float targetError = 0.0004f;
     public NeuralCategorization(NeuralData neuralData)
     {
         this.input = neuralData.input;
@@ -23,41 +26,30 @@ public class NeuralCategorization
         InitializeNetwork();
     }
 
+    /*CrossValidation crossValidation = new CrossValidation(size: input.Length, folds: 10);
+crossValidation.Fitting = delegate (int k, int[] indicesTrain, int[] indicesValidation)
+{
+    return new CrossValidationValues<object>();
+};*/
+
     public void InitializeNetwork ()
     {
-        /*CrossValidation crossValidation = new CrossValidation(size: input.Length, folds: 10);
-        crossValidation.Fitting = delegate (int k, int[] indicesTrain, int[] indicesValidation)
-        {
-            return new CrossValidationValues<object>();
-        };*/
-        IActivationFunction function = new BipolarSigmoidFunction();
-        var network = new ActivationNetwork(function, inputsCount: input.Count(), neuronsCount: new[] { 5, 1 });
-
-        // Create a Levenberg-Marquardt algorithm
-        // Because the network is expecting multiple outputs,
-        // we have to convert our single variable into arrays
-        var teacher = new LevenbergMarquardtLearning(network)
-        {
-            UseRegularization = true
-        };
-        //
+        Debug.WriteLine("INITIALIZING NETWORK");
+        IActivationFunction function = new SigmoidFunction();
+        var network = new ActivationNetwork(function, input[0].Length, neuronsCount: new[] { input[0].Length/2, output[0].Length });
+        Debug.WriteLine("INITIALIZED");
+        var teacher = new BackPropagationLearning(network);
+        teacher.LearningRate = learningRate;
+        teacher.Momentum = momentum;
         var y = output;
 
         // Iterate until stop criteria is met
-        double error = double.PositiveInfinity;
-        double previous;
-
-        do
+        double error = teacher.RunEpoch(input, output);
+        while (error > targetError)
         {
-            previous = error;
-            error = teacher.RunEpoch(input, y);
+            error = teacher.RunEpoch(input, output);
+            Debug.WriteLine("ERROR: "+error);
         }
-        while (Math.Abs(previous - error) < 1e-10 * previous);
-
-
-        // Classify the samples using the model
-        int[] answers = input.Apply(network.Compute).GetColumn(0).Apply(Math.Sign);
-        
     }
 
 

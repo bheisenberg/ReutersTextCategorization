@@ -84,6 +84,7 @@
     <Compile Include="RawArticle.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VectorReader.cs" />
     <Compile Include="XmlParser.cs" />
   </ItemGroup>
   <ItemGroup>

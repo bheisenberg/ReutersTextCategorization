@@ -12,23 +12,36 @@ namespace NeuralTextCategorization
 {
     public class XmlParser
     {
-        public List<string> totalWords;
-        public List<string> uniqueTopics;
-        public List<string> topWords;
-        string[] files = Directory.GetFiles("Resources", "*.sgm");
+        private List<string> totalWords;
+        private List<string> uniqueTopics;
+        private List<string> topWords;
+        private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TextCategorization");
+        private string input = "input.txt";
+        private string output = "output.txt";
+        private string inputFile;
+        private string outputFile;
+        private string[] files = Directory.GetFiles("Resources", "*.sgm");
+
         public XmlParser()
         {
-
+            inputFile = Path.Combine(path, input);
+            outputFile = Path.Combine(path, output);
         }
 
         public NeuralData GetNeuralData()
         {
-            this.totalWords = new List<string>();
-            this.uniqueTopics = new List<string>();
-            Debug.WriteLine("PARSING");
-            List<RawArticle> articles = GetArticles(files);
-            topWords = GetTopWords(totalWords);
-            return GetArticleVectors(articles);
+            if (!File.Exists(inputFile) || !File.Exists(outputFile))
+            {
+                this.totalWords = new List<string>();
+                this.uniqueTopics = new List<string>();
+                Debug.WriteLine("PARSING");
+                List<RawArticle> articles = GetArticles(files);
+                topWords = GetTopWords(totalWords);
+                return GetArticleVectors(articles);
+            } else
+            {
+                return new VectorReader(this.inputFile, this.outputFile).CreateVectors();
+            }
         }
 
         private NeuralData GetArticleVectors(List<RawArticle> rawArticles)
@@ -41,11 +54,37 @@ namespace NeuralTextCategorization
                 double[] topicVector = CreateVector(uniqueTopics, rawArticles[i].topics);
                 input[i] = wordVector;
                 output[i] = topicVector;
-                PrintVectors(wordVector, topicVector);
+                
+                //PrintVectors(wordVector, topicVector);
 
             }
+            WriteVectors(input, output);
             NeuralData neuralData = new NeuralData(input, output);
             return neuralData;
+        }
+
+        private void WriteVectors (double[][] input, double[][] output)
+        {
+            Debug.WriteLine("WRITING INPUT VECTORS TO FILE");
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            if (!File.Exists(inputFile)) File.Create(inputFile).Close();
+            if (!File.Exists(outputFile)) File.Create(outputFile).Close();
+            using (StreamWriter iw = new StreamWriter(inputFile, true, Encoding.UTF8))
+            {
+                for (int i = 0; i < input.Length; i++)
+                {
+                    string result = string.Join(" ", input[i].Select(Convert.ToInt32).ToArray());
+                    iw.WriteLine(result);
+                }
+            }
+            using (StreamWriter ow = new StreamWriter(outputFile, true, Encoding.UTF8))
+            {
+                for (int i = 0; i < output.Length; i++)
+                {
+                    string result = string.Join(" ", output[i].Select(Convert.ToInt32).ToArray());
+                    ow.WriteLine(result);
+                }
+            }
         }
 
         private double[] CreateVector(List<string> classifier, List<string> data)
