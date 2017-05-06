@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 public class FoldData
 {
@@ -17,17 +18,23 @@ public class FoldData
         this.trainY = new double[neuralData.output.GetLength(0) - (end - start)][];
         this.testX = new double[end - start][];
         this.testY = new double[end - start][];
+        Debug.WriteLine("END-START: " + (end-start));
+        Debug.WriteLine("TRAINX LENGTH: " + trainX.Length);
         int height = neuralData.input.GetLength(0);
+        int j = 0;
+        int k = 0;
         for (int i = 0; i < height; i++)
         {
-            if (i <= start && i > end)
+            if (i >= start && i < end)
             {
-                testX[i] = neuralData.input[i];
-                testY[i] = neuralData.output[i];
+                testX[k] = neuralData.input[i];
+                testY[k] = neuralData.output[i];
+                k++;
             } else
             {
-                trainX[i] = neuralData.input[i];
-                trainY[i] = neuralData.output[i];
+                trainX[j] = neuralData.input[i];
+                trainY[j] = neuralData.output[i];
+                j++;
             }
         }
     }

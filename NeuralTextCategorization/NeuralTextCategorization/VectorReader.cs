@@ -10,10 +10,12 @@ public class VectorReader
 {
     private string inputFile;
     private string outputFile;
-    public VectorReader (string inputFile, string outputFile)
+    private string topicFile;
+    public VectorReader (string inputFile, string outputFile, string topicFile)
     {
         this.inputFile = inputFile;
         this.outputFile = outputFile;
+        this.topicFile = topicFile;
     }
 
     public NeuralData CreateVectors()
@@ -22,12 +24,13 @@ public class VectorReader
         string[] outputLines = File.ReadAllLines(outputFile);
         double[][] inputVectors = new double[inputLines.Length][];
         double[][] outputVectors = new double[outputLines.Length][];
+        string[] topics = File.ReadAllLines(topicFile);
         for (int i=0; i < inputLines.Length; i++)
         {
             //Debug.WriteLine(inputLines[i]);
             inputVectors[i] = inputLines[i].Split(' ').Select(n => Convert.ToDouble(n)).ToArray();
             outputVectors[i] = outputLines[i].Split(' ').Select(n => Convert.ToDouble(n)).ToArray();
         }
-        return new NeuralData(inputVectors, outputVectors);
+        return new NeuralData(inputVectors, outputVectors, topics);
     }
 }

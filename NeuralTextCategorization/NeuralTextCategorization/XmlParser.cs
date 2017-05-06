@@ -15,23 +15,26 @@ namespace NeuralTextCategorization
         private List<string> totalWords;
         private List<string> uniqueTopics;
         private List<string> topWords;
-        private int wordCount = 250;
+        private int numWords = 250;
         private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TextCategorization");
         private string input = "input.txt";
         private string output = "output.txt";
+        private string topics = "topics.txt";
         private string inputFile;
         private string outputFile;
+        private string topicsFile;
         private string[] files = Directory.GetFiles("Resources", "*.sgm");
 
         public XmlParser()
         {
             inputFile = Path.Combine(path, input);
             outputFile = Path.Combine(path, output);
+            topicsFile = Path.Combine(path, topics);
         }
 
         public NeuralData GetNeuralData()
         {
-            if (!File.Exists(inputFile) || !File.Exists(outputFile))
+            if (!File.Exists(inputFile) || !File.Exists(outputFile) || !File.Exists(topicsFile))
             {
                 this.totalWords = new List<string>();
                 this.uniqueTopics = new List<string>();
@@ -41,7 +44,7 @@ namespace NeuralTextCategorization
                 return GetArticleVectors(articles);
             } else
             {
-                return new VectorReader(this.inputFile, this.outputFile).CreateVectors();
+                return new VectorReader(this.inputFile, this.outputFile, this.topicsFile).CreateVectors();
             }
         }
 
@@ -60,7 +63,7 @@ namespace NeuralTextCategorization
 
             }
             WriteVectors(input, output);
-            NeuralData neuralData = new NeuralData(input, output);
+            NeuralData neuralData = new NeuralData(input, output, uniqueTopics.ToArray());
             return neuralData;
         }
 
@@ -70,6 +73,7 @@ namespace NeuralTextCategorization
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             if (!File.Exists(inputFile)) File.Create(inputFile).Close();
             if (!File.Exists(outputFile)) File.Create(outputFile).Close();
+            if (!File.Exists(topicsFile)) File.Create(topicsFile).Close();
             using (StreamWriter iw = new StreamWriter(inputFile, true, Encoding.UTF8))
             {
                 for (int i = 0; i < input.Length; i++)
@@ -84,6 +88,13 @@ namespace NeuralTextCategorization
                 {
                     string result = string.Join(" ", output[i].Select(Convert.ToInt32).ToArray());
                     ow.WriteLine(result);
+                }
+            }
+            using (StreamWriter tw = new StreamWriter(topicsFile, true, Encoding.UTF8))
+            {
+                for (int i = 0; i < uniqueTopics.Count; i++)
+                {
+                    tw.WriteLine(uniqueTopics[i]);
                 }
             }
         }
@@ -122,7 +133,7 @@ namespace NeuralTextCategorization
                 }
             }
             var wordsOrdered = (from entry in wordDict orderby entry.Value descending select entry).ToList();
-            for (int i = 0; i < wordCount; i++)
+            for (int i = 0; i < numWords; i++)
             {
                 Debug.WriteLine(string.Format("{0}: {1}: {2}", i, wordsOrdered[i].Key, wordsOrdered[i].Value));
                 topWords.Add(wordsOrdered[i].Key);

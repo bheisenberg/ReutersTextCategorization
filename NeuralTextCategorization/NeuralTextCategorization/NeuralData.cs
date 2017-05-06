@@ -8,11 +8,13 @@ public class NeuralData
 {
     public double[][] input { get; set; }
     public double[][] output { get; set; }
+    public string[] topics { get; set; }
 
-    public NeuralData(double[][] input, double[][] output)
+    public NeuralData(double[][] input, double[][] output, string[] topics)
     {
         this.input = input;
         this.output = output;
+        this.topics = topics;
     }
 
     public override string ToString()
