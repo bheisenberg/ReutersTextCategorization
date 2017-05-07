@@ -30,7 +30,11 @@ public class TopicResults
     public double MCC()
     {
         double numerator = (truePositives * trueNegatives) - (falsePositives * falseNegatives);
-        double denominatorValue = Math.Sqrt((truePositives + falsePositives) * (truePositives + falseNegatives) * (trueNegatives + falsePositives) * (trueNegatives + falseNegatives));
+        double TPFP = (truePositives + falsePositives > 0) ? truePositives + falsePositives : 1;
+        double TPFN = (truePositives + falseNegatives > 0) ? truePositives + falseNegatives : 1;
+        double TNFP = (trueNegatives + falsePositives > 0) ? trueNegatives + falsePositives : 1;
+        double TNFN = (trueNegatives + falseNegatives > 0) ? trueNegatives + falseNegatives : 1;
+        double denominatorValue = Math.Sqrt((TPFP) * (TPFN) * (TNFP) * (TNFN));
         double denominator = (denominatorValue == 0) ? 1 : denominatorValue;
         return numerator / denominator;
     }
