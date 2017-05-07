@@ -15,7 +15,7 @@ namespace NeuralTextCategorization
         private List<string> totalWords;
         private List<string> uniqueTopics;
         private List<string> topWords;
-        private int numWords = 1000;
+        private int numWords = 100;
         private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TextCategorization");
         private string input = "input.txt";
         private string output = "output.txt";

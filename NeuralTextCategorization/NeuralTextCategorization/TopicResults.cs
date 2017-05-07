@@ -24,14 +24,14 @@ public class TopicResults
 
     public override string ToString()
     {
-        return string.Format("{0}: TP: {1}, FP: {2}, TN: {3}, FN: {4}", topicName, truePositives, falsePositives, trueNegatives, falseNegatives);
+        return string.Format("{0}: TP: {1}, FP: {2}, TN: {3}, FN: {4}", topicName, truePositives, trueNegatives, falsePositives, falseNegatives);
     }
 
     public double MCC()
     {
-        double numeratorValue = (truePositives * trueNegatives) - (falsePositives * falseNegatives);
-        double numerator = (numeratorValue == 0) ? numeratorValue : 1;
-        double denominator = Math.Sqrt((truePositives + falsePositives) * (truePositives + falseNegatives) * (trueNegatives + falsePositives) + (trueNegatives + falseNegatives));
+        double numerator = (truePositives * trueNegatives) - (falsePositives * falseNegatives);
+        double denominatorValue = Math.Sqrt((truePositives + falsePositives) * (truePositives + falseNegatives) * (trueNegatives + falsePositives) * (trueNegatives + falseNegatives));
+        double denominator = (denominatorValue == 0) ? 1 : denominatorValue;
         return numerator / denominator;
     }
 }

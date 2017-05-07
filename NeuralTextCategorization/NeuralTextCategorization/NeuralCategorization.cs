@@ -121,9 +121,9 @@ public class NeuralCategorization
             for(int j=0; j < predictedY[i].Length; j++)
             {
                 if (Math.Round(predictedY[i][j]) == 1 && actualY[i][j] == 1) ConfusionMatrix[j].truePositives += 1;
-                if (Math.Round(predictedY[i][j]) == 0 && actualY[i][j] == 1) ConfusionMatrix[j].falseNegatives += 1;
                 if (Math.Round(predictedY[i][j]) == 0 && actualY[i][j] == 0) ConfusionMatrix[j].trueNegatives += 1;
                 if (Math.Round(predictedY[i][j]) == 1 && actualY[i][j] == 0) ConfusionMatrix[j].falsePositives += 1;
+                if (Math.Round(predictedY[i][j]) == 0 && actualY[i][j] == 1) ConfusionMatrix[j].falseNegatives += 1;
             }
         }
     }
