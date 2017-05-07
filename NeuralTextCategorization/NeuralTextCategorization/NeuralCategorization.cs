@@ -76,7 +76,9 @@ public class NeuralCategorization
             Debug.WriteLine(hiddenLayers);
             IActivationFunction function = new BipolarSigmoidFunction();
             var network = new ActivationNetwork(function, currentFold.trainX[0].Length, hiddenLayers, currentFold.trainY[0].Length);
-            var teacher = new ParallelResilientBackpropagationLearning(network);
+            var teacher = new BackPropagationLearning(network);
+            teacher.Momentum = 0.9f;
+            teacher.LearningRate = 0.1f;
             new NguyenWidrow(network).Randomize();
             double error = int.MaxValue;
             double previousError = error;

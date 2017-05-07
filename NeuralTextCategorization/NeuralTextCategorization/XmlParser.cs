@@ -15,7 +15,7 @@ namespace NeuralTextCategorization
         private List<string> totalWords;
         private List<string> uniqueTopics;
         private List<string> topWords;
-        private int numWords = 250;
+        private int numWords = 1000;
         private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TextCategorization");
         private string input = "input.txt";
         private string output = "output.txt";
@@ -193,7 +193,7 @@ namespace NeuralTextCategorization
                 {
                     List<string> topics = GetTopics(article);
                     List<string> words = GetWords(article);
-                    articles.Add(new RawArticle(words, topics));
+                    if(topics.Count() > 0) articles.Add(new RawArticle(words, topics));
                 }
 
             }
